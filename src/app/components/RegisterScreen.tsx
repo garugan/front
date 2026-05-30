@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Camera,
   Check,
@@ -9,12 +9,15 @@ import {
   Star,
   X,
 } from 'lucide-react';
-import { type SearchResult, initialRestaurants, restaurantSearchResults } from './data';
+import { searchRestaurants } from '../services/restaurantSearch';
+import { type Restaurant, type SearchResult } from './data';
 
 interface RegisterScreenProps {
   restaurantId?: string;
+  restaurants: Restaurant[];
   initialRestaurant?: SearchResult;
-  onSave: () => void;
+  onSave: (restaurant: Restaurant) => Promise<void> | void;
+  onSaved: () => void;
 }
 
 type ElevatorOption = 'yes' | 'no' | 'unknown';
@@ -22,10 +25,12 @@ type FloorOption = '1F' | '2F+';
 
 export function RegisterScreen({
   restaurantId,
+  restaurants,
   initialRestaurant,
   onSave,
+  onSaved,
 }: RegisterScreenProps) {
-  const existing = restaurantId ? initialRestaurants.find((r) => r.id === restaurantId) : null;
+  const existing = restaurantId ? restaurants.find((r) => r.id === restaurantId) : null;
   const draft = existing ?? initialRestaurant;
 
   const [selectedRestaurant, setSelectedRestaurant] = useState<SearchResult | undefined>(draft);
@@ -33,17 +38,46 @@ export function RegisterScreen({
   const [status, setStatus] = useState<'visited' | 'want'>(existing?.status ?? 'visited');
   const [rating, setRating] = useState(existing?.rating ?? 0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [visitDate, setVisitDate] = useState(existing?.visitDate ?? '2026-05-29');
+  const [visitDate, setVisitDate] = useState(existing?.visitDate ?? new Date().toISOString().slice(0, 10));
   const [memo, setMemo] = useState(existing?.memo ?? '');
   const [floor, setFloor] = useState<FloorOption>(existing?.floor ?? '1F');
   const [elevator, setElevator] = useState<ElevatorOption>(existing?.elevator ?? 'unknown');
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | undefined>();
   const address = selectedRestaurant?.address ?? 'タップしてお店を検索してください';
   const category = selectedRestaurant?.category;
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(onSave, 800);
+  const handleSave = async () => {
+    if (!selectedRestaurant || isSaving) {
+      return;
+    }
+
+    const restaurant: Restaurant = {
+      id: existing?.id ?? selectedRestaurant.id,
+      name: selectedRestaurant.name,
+      photo: selectedRestaurant.photo ?? existing?.photo ?? '',
+      status,
+      rating,
+      visitDate: status === 'visited' ? visitDate : undefined,
+      memo,
+      floor,
+      elevator,
+      category: selectedRestaurant.category,
+      address: selectedRestaurant.address,
+    };
+
+    setIsSaving(true);
+    setSaveError(undefined);
+
+    try {
+      await onSave(restaurant);
+      setSaved(true);
+      window.setTimeout(onSaved, 500);
+    } catch {
+      setSaveError('保存に失敗しました。時間をおいて再度お試しください。');
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -227,11 +261,19 @@ export function RegisterScreen({
 
         {/* Save button */}
         <div className="mx-4 mt-4">
+          {saveError && (
+            <p className="mb-2 text-center text-xs text-red-400">{saveError}</p>
+          )}
           <button
             onClick={handleSave}
+            disabled={!selectedRestaurant || saved || isSaving}
             className={`w-full py-4 rounded-2xl text-white transition-all ${
-              saved ? 'bg-emerald-500' : 'bg-orange-500 active:bg-orange-600'
-            } shadow-lg`}
+              saved
+                ? 'bg-emerald-500'
+                : selectedRestaurant
+                ? 'bg-orange-500 active:bg-orange-600'
+                : 'bg-gray-300'
+            } shadow-lg disabled:shadow-none`}
             style={{ fontWeight: 700 }}
           >
             {saved ? (
@@ -239,6 +281,8 @@ export function RegisterScreen({
                 <Check size={18} />
                 保存しました！
               </span>
+            ) : isSaving ? (
+              '保存中...'
             ) : (
               '保存する'
             )}
@@ -268,21 +312,54 @@ function RestaurantSearchPanel({
 }) {
   const [query, setQuery] = useState('');
   const [searched, setSearched] = useState(false);
-  const filtered = restaurantSearchResults.filter(
-    (restaurant) =>
-      restaurant.name.includes(query) ||
-      restaurant.category.includes(query) ||
-      restaurant.address.includes(query),
-  );
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+  useEffect(() => {
+    const normalizedQuery = query.trim();
+
+    if (!normalizedQuery) {
+      setResults([]);
+      setIsSearching(false);
+      setErrorMessage(undefined);
+      return;
+    }
+
+    setIsSearching(true);
+    setErrorMessage(undefined);
+
+    const timeoutId = window.setTimeout(() => {
+      void searchRestaurants(normalizedQuery)
+        .then((restaurants) => {
+          setResults(restaurants);
+        })
+        .catch(() => {
+          setResults([]);
+          setErrorMessage('検索に失敗しました。時間をおいて再度お試しください。');
+        })
+        .finally(() => {
+          setIsSearching(false);
+        });
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [query]);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
-    setSearched(value.trim().length > 0);
+    const normalizedValue = value.trim();
+    setSearched(normalizedValue.length > 0);
   };
 
   const clearQuery = () => {
     setQuery('');
     setSearched(false);
+    setResults([]);
+    setErrorMessage(undefined);
+    setIsSearching(false);
   };
 
   return (
@@ -308,7 +385,9 @@ function RestaurantSearchPanel({
             type="text"
             placeholder="店名・エリアで検索..."
             value={query}
-            onChange={(event) => handleQueryChange(event.target.value)}
+            onChange={(event) => {
+              handleQueryChange(event.target.value);
+            }}
             className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
           />
           {query && (
@@ -327,24 +406,33 @@ function RestaurantSearchPanel({
               店名やエリアを入力してください
             </p>
             <p className="text-xs mt-1 leading-relaxed">
-              現在、検索候補データは未登録です。
+              Google Places から候補を検索します。
             </p>
           </div>
         ) : (
           <div className="pt-3 pb-4">
             <div className="px-4 mb-2">
               <span className="text-xs text-gray-400">
-                {filtered.length > 0 ? `${filtered.length}件の検索結果` : '検索結果がありません'}
+                {isSearching
+                  ? '検索中...'
+                  : results.length > 0
+                  ? `${results.length}件の検索結果`
+                  : '検索結果がありません'}
               </span>
             </div>
-            {filtered.map((restaurant) => (
+            {results.map((restaurant) => (
               <RestaurantSearchResultRow
                 key={restaurant.id}
                 restaurant={restaurant}
                 onSelect={onSelect}
               />
             ))}
-            {filtered.length === 0 && (
+            {errorMessage ? (
+              <div className="flex flex-col items-center py-12 text-gray-400">
+                <X size={36} className="mb-2 opacity-30" />
+                <p className="text-sm">{errorMessage}</p>
+              </div>
+            ) : !isSearching && results.length === 0 && (
               <div className="flex flex-col items-center py-12 text-gray-400">
                 <Search size={36} className="mb-2 opacity-30" />
                 <p className="text-sm">「{query}」に一致するお店が見つかりませんでした</p>
@@ -373,9 +461,6 @@ function RestaurantSearchResultRow({
         onClick={() => onSelect(restaurant)}
         className="w-full bg-white rounded-xl px-3 py-3 flex items-center gap-3 shadow-sm text-left"
       >
-        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-          <img src={restaurant.photo} alt={restaurant.name} className="w-full h-full object-cover" />
-        </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm text-gray-800 leading-snug" style={{ fontWeight: 500 }}>
             {restaurant.name}
@@ -394,9 +479,6 @@ function RestaurantSearchResultRow({
       className="w-[calc(100%-2rem)] bg-white rounded-2xl mx-4 mb-3 shadow-sm overflow-hidden text-left"
     >
       <div className="flex items-stretch">
-        <div className="w-20 h-20 flex-shrink-0">
-          <img src={restaurant.photo} alt={restaurant.name} className="w-full h-full object-cover" />
-        </div>
         <div className="flex-1 p-3 min-w-0">
           <p className="text-sm text-gray-800 leading-snug line-clamp-1 mb-1" style={{ fontWeight: 600 }}>
             {restaurant.name}

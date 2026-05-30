@@ -1,16 +1,28 @@
 import { Settings, ChevronRight, Bell, Shield, HelpCircle, LogOut, Star, UtensilsCrossed, Users, Heart, User } from 'lucide-react';
-import { initialRestaurants, initialFriends } from './data';
+import { type Restaurant, initialFriends } from './data';
+import { type AuthUser } from '../services/auth';
 
-export function MyPageScreen() {
-  const visitedCount = initialRestaurants.filter((r) => r.status === 'visited').length;
-  const wantCount = initialRestaurants.filter((r) => r.status === 'want').length;
+export function MyPageScreen({
+  restaurants,
+  user,
+  onLogout,
+}: {
+  restaurants: Restaurant[];
+  user: AuthUser | null;
+  onLogout: () => void;
+}) {
+  const visitedCount = restaurants.filter((r) => r.status === 'visited').length;
+  const wantCount = restaurants.filter((r) => r.status === 'want').length;
   const friendCount = initialFriends.length;
+  const displayName = user?.name?.trim() || user?.email.split('@')[0] || 'ユーザー';
+  const displayEmail = user?.email ?? '';
+  const initial = displayName.slice(0, 1).toUpperCase();
 
   const menuItems = [
     { icon: Bell, label: '通知設定', sub: 'フレンドの新着記録をお知らせ' },
     { icon: Shield, label: 'プライバシー設定', sub: '記録の公開範囲' },
     { icon: HelpCircle, label: 'ヘルプ・よくある質問', sub: null },
-    { icon: LogOut, label: 'ログアウト', sub: null, danger: true },
+    { icon: LogOut, label: 'ログアウト', sub: null, danger: true, onClick: onLogout },
   ];
 
   return (
@@ -26,12 +38,22 @@ export function MyPageScreen() {
 
         {/* User info */}
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full border-2 border-gray-200 bg-gray-100 flex items-center justify-center">
-            <User size={26} className="text-gray-400" />
+          <div className="w-16 h-16 rounded-full border-2 border-orange-100 bg-orange-50 flex items-center justify-center">
+            {initial ? (
+              <span className="text-xl text-orange-500" style={{ fontWeight: 700 }}>
+                {initial}
+              </span>
+            ) : (
+              <User size={26} className="text-orange-300" />
+            )}
           </div>
-          <div>
-            <p className="text-gray-900" style={{ fontWeight: 700, fontSize: 17 }}>ユーザー未設定</p>
-            <p className="text-xs text-gray-400 mt-0.5">プロフィール情報は未設定です</p>
+          <div className="min-w-0">
+            <p className="truncate text-gray-900" style={{ fontWeight: 700, fontSize: 17 }}>
+              {displayName}
+            </p>
+            <p className="truncate text-xs text-gray-400 mt-0.5">
+              {displayEmail}
+            </p>
           </div>
         </div>
       </div>
@@ -40,7 +62,7 @@ export function MyPageScreen() {
       <div className="mx-4 mt-4 bg-white rounded-2xl shadow-sm overflow-hidden">
         <div className="grid grid-cols-4 divide-x divide-gray-100">
           {[
-            { label: '記録', value: initialRestaurants.length, icon: UtensilsCrossed, color: 'text-gray-600', bg: 'bg-gray-50' },
+            { label: '記録', value: restaurants.length, icon: UtensilsCrossed, color: 'text-gray-600', bg: 'bg-gray-50' },
             { label: '行った', value: visitedCount, icon: Heart, color: 'text-orange-500', bg: 'bg-orange-50' },
             { label: '行きたい', value: wantCount, icon: Star, color: 'text-sky-500', bg: 'bg-sky-50' },
             { label: 'フレンド', value: friendCount, icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-50' },
@@ -63,6 +85,7 @@ export function MyPageScreen() {
           return (
             <button
               key={item.label}
+              onClick={item.onClick}
               className={`w-full flex items-center gap-3 px-4 py-3.5 text-left ${
                 i < menuItems.length - 1 ? 'border-b border-gray-50' : ''
               }`}

@@ -29,13 +29,14 @@ export interface Friend {
   restaurants: Restaurant[];
 }
 
-export type SearchResult = Pick<
-  Restaurant,
-  'id' | 'name' | 'photo' | 'category' | 'address'
->;
+export interface SearchResult {
+  id: string;
+  name: string;
+  category: string;
+  address: string;
+  photo?: string;
+}
 
 export const initialRestaurants: Restaurant[] = [];
-
-export const restaurantSearchResults: SearchResult[] = [];
 
 export const initialFriends: Friend[] = [];

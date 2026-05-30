@@ -65,10 +65,8 @@ export function SideNav({ activeTab, onTabChange }: TabBarProps) {
     <aside className="hidden md:flex w-60 flex-shrink-0 flex-col border-r border-gray-100 bg-white">
       <div className="px-5 pt-8 pb-6">
         <h1 className="text-xl text-gray-900">
-          <span className="text-orange-500" style={{ fontWeight: 700 }}>
-            Mog
-          </span>
-          <span style={{ fontWeight: 700 }}>Reco</span>
+          <span className="text-orange-500" style={{ fontWeight: 700 }}>Band</span>
+          <span style={{ fontWeight: 700 }}> Meshi</span>
         </h1>
         <p className="text-xs text-gray-400 mt-1">Restaurant log</p>
       </div>

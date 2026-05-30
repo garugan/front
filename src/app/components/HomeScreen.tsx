@@ -1,23 +1,34 @@
 import { useState } from 'react';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { MapPin, Search, SlidersHorizontal, Star } from 'lucide-react';
 import { type Restaurant } from './data';
-import { RestaurantCardRow } from './shared';
 
-type Filter = 'all' | 'visited' | 'want';
+type Filter = 'visited' | 'want';
+type ElevatorFilter = 'all' | 'yes' | 'no' | 'unknown';
+type FloorFilter = 'all' | '1F' | '2F+';
 
 interface HomeScreenProps {
   restaurants: Restaurant[];
+  filter: Filter;
+  onFilterChange: (filter: Filter) => void;
   onRestaurantClick: (id: string) => void;
 }
 
-export function HomeScreen({ restaurants, onRestaurantClick }: HomeScreenProps) {
-  const [filter, setFilter] = useState<Filter>('all');
+export function HomeScreen({
+  restaurants,
+  filter,
+  onFilterChange,
+  onRestaurantClick,
+}: HomeScreenProps) {
   const [query, setQuery] = useState('');
+  const [elevatorFilter, setElevatorFilter] = useState<ElevatorFilter>('all');
+  const [floorFilter, setFloorFilter] = useState<FloorFilter>('all');
 
   const filtered = restaurants.filter((r) => {
-    const matchFilter = filter === 'all' || r.status === filter;
+    const matchFilter = r.status === filter;
     const matchQuery = r.name.includes(query) || r.category.includes(query);
-    return matchFilter && matchQuery;
+    const matchElevator = elevatorFilter === 'all' || r.elevator === elevatorFilter;
+    const matchFloor = floorFilter === 'all' || r.floor === floorFilter;
+    return matchFilter && matchQuery && matchElevator && matchFloor;
   });
 
   const visitedCount = restaurants.filter((r) => r.status === 'visited').length;
@@ -31,9 +42,8 @@ export function HomeScreen({ restaurants, onRestaurantClick }: HomeScreenProps) 
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-xl text-gray-900">
-              <span className="text-orange-500" style={{ fontWeight: 700 }}>Mog</span>
-              <span style={{ fontWeight: 700 }}>Reco</span>
-              <span className="text-gray-400 text-sm ml-1" style={{ fontWeight: 400 }}>Alternative</span>
+              <span className="text-orange-500" style={{ fontWeight: 700 }}>Band</span>
+              <span style={{ fontWeight: 700 }}> Meshi</span>
             </h1>
           </div>
           <button className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
@@ -66,12 +76,12 @@ export function HomeScreen({ restaurants, onRestaurantClick }: HomeScreenProps) 
         </div>
 
         {/* Filter tabs */}
-        <div className="flex bg-gray-100 rounded-xl p-1 mb-3">
-          {([['all', 'すべて'], ['visited', '行った'], ['want', '行きたい']] as [Filter, string][]).map(
+        <div className="flex bg-gray-100 rounded-xl p-1 mb-2">
+          {([['visited', '行った'], ['want', '行きたい']] as [Filter, string][]).map(
             ([id, label]) => (
               <button
                 key={id}
-                onClick={() => setFilter(id)}
+                onClick={() => onFilterChange(id)}
                 className={`flex-1 py-1.5 text-xs rounded-lg transition-all ${
                   filter === id ? 'bg-white text-orange-500 shadow-sm' : 'text-gray-500'
                 }`}
@@ -81,6 +91,39 @@ export function HomeScreen({ restaurants, onRestaurantClick }: HomeScreenProps) 
               </button>
             )
           )}
+        </div>
+
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          <label className="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5">
+            <span className="text-xs text-gray-500" style={{ fontWeight: 600 }}>
+              階数
+            </span>
+            <select
+              value={floorFilter}
+              onChange={(event) => setFloorFilter(event.target.value as FloorFilter)}
+              className="min-w-20 bg-transparent text-right text-sm text-gray-700 outline-none"
+            >
+              <option value="all">すべて</option>
+              <option value="1F">1階</option>
+              <option value="2F+">2階以上</option>
+            </select>
+          </label>
+
+          <label className="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5">
+            <span className="text-xs text-gray-500" style={{ fontWeight: 600 }}>
+              EV
+            </span>
+            <select
+              value={elevatorFilter}
+              onChange={(event) => setElevatorFilter(event.target.value as ElevatorFilter)}
+              className="min-w-20 bg-transparent text-right text-sm text-gray-700 outline-none"
+            >
+              <option value="all">すべて</option>
+              <option value="yes">あり</option>
+              <option value="no">なし</option>
+              <option value="unknown">不明</option>
+            </select>
+          </label>
         </div>
       </div>
 
@@ -95,11 +138,60 @@ export function HomeScreen({ restaurants, onRestaurantClick }: HomeScreenProps) 
             <p className="text-sm">お店が見つかりません</p>
           </div>
         ) : (
-          filtered.map((r) => (
-            <RestaurantCardRow key={r.id} restaurant={r} onClick={() => onRestaurantClick(r.id)} />
-          ))
+          <div className="grid grid-cols-3 xl:grid-cols-4 gap-3 px-4">
+            {filtered.map((r) => (
+              <RestaurantSquareCard
+                key={r.id}
+                restaurant={r}
+                onClick={() => onRestaurantClick(r.id)}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
+  );
+}
+
+function RestaurantSquareCard({
+  restaurant,
+  onClick,
+}: {
+  restaurant: Restaurant;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative aspect-square overflow-hidden rounded-2xl bg-white text-left shadow-sm active:opacity-80"
+    >
+      {restaurant.photo ? (
+        <img
+          src={restaurant.photo}
+          alt={restaurant.name}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-sky-50">
+          <MapPin size={34} className="text-orange-300" />
+        </div>
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/20" />
+
+      <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] text-orange-500 shadow-sm">
+        <Star size={12} className="fill-orange-400 text-orange-400" />
+        <span style={{ fontWeight: 700 }}>
+          {restaurant.status === 'visited' && restaurant.rating > 0 ? restaurant.rating : '-'}
+        </span>
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 p-3">
+        <p className="line-clamp-2 text-sm leading-snug text-white drop-shadow-sm" style={{ fontWeight: 700 }}>
+          {restaurant.name}
+        </p>
+      </div>
+    </button>
   );
 }
