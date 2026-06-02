@@ -56,7 +56,8 @@ export function RegisterScreen({
     const restaurant: Restaurant = {
       id: existing?.id ?? selectedRestaurant.id,
       name: selectedRestaurant.name,
-      photo: selectedRestaurant.photo ?? existing?.photo ?? '',
+      photo: existing?.photo ?? '',
+      photoName: selectedRestaurant.photoName,
       status,
       rating,
       visitDate: status === 'visited' ? visitDate : undefined,

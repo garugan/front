@@ -2,6 +2,7 @@ export interface Restaurant {
   id: string;
   name: string;
   photo: string;
+  photoName?: string;
   status: 'visited' | 'want';
   rating: number;
   visitDate?: string;
@@ -34,7 +35,7 @@ export interface SearchResult {
   name: string;
   category: string;
   address: string;
-  photo?: string;
+  photoName?: string;
 }
 
 export const initialRestaurants: Restaurant[] = [];
