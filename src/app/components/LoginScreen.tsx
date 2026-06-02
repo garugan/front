@@ -5,8 +5,6 @@ import {
   EyeOff,
   Lock,
   Mail,
-  MapPin,
-  Star,
   User,
   UtensilsCrossed,
 } from 'lucide-react';
@@ -86,32 +84,17 @@ export function LoginScreen({ onLogin, onRegister }: LoginScreenProps) {
     <div className="size-full overflow-y-auto bg-gray-50">
       <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col px-4 py-6 sm:px-6 md:flex-row md:items-center md:gap-8 md:py-8">
         <section className="flex-1 pb-5 pt-4 md:pb-0">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-lg shadow-orange-100">
-            <UtensilsCrossed size={25} />
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-lg shadow-orange-100">
+              <UtensilsCrossed size={25} />
+            </div>
+            <h1 className="text-4xl leading-tight text-gray-900 sm:text-5xl" style={{ fontWeight: 800 }}>
+              <span className="text-orange-500">Band</span> Meshi
+            </h1>
           </div>
-          <h1 className="mt-5 text-4xl leading-tight text-gray-900 sm:text-5xl" style={{ fontWeight: 800 }}>
-            <span className="text-orange-500">Band</span> Meshi
-          </h1>
           <p className="mt-3 max-w-md text-sm leading-6 text-gray-500">
             行ったお店も、次に行きたいお店も、バンドメンバーとまとめて記録。
           </p>
-
-          <div className="mt-6 grid max-w-md grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white p-4 shadow-sm">
-              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50">
-                <Star size={17} className="fill-orange-400 text-orange-400" />
-              </div>
-              <p className="text-sm text-gray-900" style={{ fontWeight: 800 }}>記録を整理</p>
-              <p className="mt-1 text-[11px] leading-4 text-gray-400">評価とメモを残す</p>
-            </div>
-            <div className="rounded-2xl bg-white p-4 shadow-sm">
-              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50">
-                <MapPin size={17} className="text-sky-500" />
-              </div>
-              <p className="text-sm text-gray-900" style={{ fontWeight: 800 }}>候補を共有</p>
-              <p className="mt-1 text-[11px] leading-4 text-gray-400">次の店を見つける</p>
-            </div>
-          </div>
         </section>
 
         <section className="w-full rounded-[28px] bg-white p-5 shadow-xl shadow-gray-200/60 sm:p-6 md:max-w-[420px]">
