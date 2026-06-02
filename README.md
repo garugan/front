@@ -19,8 +19,12 @@ cp .env.example .env.local
 
 ```env
 VITE_API_BASE_URL=http://localhost:3000
+VITE_RECAPTCHA_ENABLED=false
 VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
 ```
+
+`VITE_RECAPTCHA_ENABLED=false` の場合、ログイン/新規登録時に reCAPTCHA は実行されません。
+本番では `true` にして、Google reCAPTCHA v3 の Site Key を `VITE_RECAPTCHA_SITE_KEY` に設定します。
 
 ## ビルド
 

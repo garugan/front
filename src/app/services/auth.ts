@@ -1,5 +1,6 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
 const authStorageKey = 'band-meshi-auth';
+const authRequestTimeoutMs = 15_000;
 
 export interface AuthUser {
   id: string;
@@ -85,13 +86,31 @@ export async function register(
 
 async function authRequest(path: string, body: Record<string, string | undefined>) {
   const url = new URL(path, apiBaseUrl);
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => {
+    controller.abort();
+  }, authRequestTimeoutMs);
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('認証リクエストがタイムアウトしました');
+    }
+
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     if (response.status >= 500) {
