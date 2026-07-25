@@ -41,7 +41,7 @@ export function DetailScreen({ restaurantId, restaurants, onBack, onEdit, onFrie
         {/* Edit button */}
         <button
           onClick={() => onEdit(restaurant.id)}
-          className="absolute top-10 right-4 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-sm"
+          className="absolute top-10 right-16 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-sm"
         >
           <Pencil size={15} className="text-gray-700" />
         </button>

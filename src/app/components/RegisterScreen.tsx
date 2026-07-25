@@ -84,7 +84,7 @@ export function RegisterScreen({
   return (
     <div className="h-full flex flex-col bg-gray-50 relative">
       {/* Header */}
-      <div className="bg-white pt-10 px-4 pb-4 shadow-sm flex items-center gap-3">
+      <div className="bg-white pt-10 pl-4 pr-16 pb-4 shadow-sm flex items-center gap-3">
         <h2 className="text-gray-800 flex-1" style={{ fontWeight: 700 }}>
           {existing ? 'お店を編集' : 'お店を記録する'}
         </h2>

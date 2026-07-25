@@ -108,7 +108,7 @@ export function FriendRecordsScreen({
   return (
     <div className="h-full flex flex-col bg-gray-50">
       <div className="bg-white pt-10 px-4 pb-0 shadow-sm">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4 pr-12">
           <button
             onClick={onBack}
             className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100"

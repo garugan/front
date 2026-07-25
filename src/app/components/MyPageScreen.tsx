@@ -30,7 +30,7 @@ export function MyPageScreen({
     <div className="h-full bg-gray-50 overflow-y-auto">
       {/* Header */}
       <div className="bg-white pt-10 px-4 pb-5 shadow-sm">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-5 pr-12">
           <h2 className="text-gray-800" style={{ fontWeight: 700 }}>マイページ</h2>
           <button className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
             <Settings size={17} className="text-gray-500" />

@@ -6,7 +6,7 @@ import { FriendsScreen } from "./components/FriendsScreen";
 import { FriendRecordsScreen } from "./components/FriendRecordsScreen";
 import { LoginScreen } from "./components/LoginScreen";
 import { MyPageScreen } from "./components/MyPageScreen";
-import { SideNav, TabBar, type Tab } from "./components/TabBar";
+import { AppMenu, type Tab } from "./components/AppMenu";
 import {
   type Friend,
   type FriendRequest,
@@ -176,12 +176,7 @@ export default function App() {
   };
 
   return (
-    <div className="size-full flex flex-col md:flex-row overflow-hidden bg-gray-50">
-      <SideNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
-
+    <div className="size-full flex flex-col overflow-hidden bg-gray-50">
       <div className="flex-1 overflow-hidden relative">
         {currentView === "home" && (
           <HomeScreen
@@ -270,7 +265,7 @@ export default function App() {
         )}
       </div>
 
-      <TabBar
+      <AppMenu
         activeTab={activeTab}
         onTabChange={handleTabChange}
       />
