@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HomeScreen } from "./components/HomeScreen";
 import { RegisterScreen } from "./components/RegisterScreen";
 import { DetailScreen } from "./components/DetailScreen";
@@ -8,10 +8,11 @@ import { LoginScreen } from "./components/LoginScreen";
 import { MyPageScreen } from "./components/MyPageScreen";
 import { SideNav, TabBar, type Tab } from "./components/TabBar";
 import {
+  type Friend,
+  type FriendRequest,
   type Restaurant,
   type SearchResult,
   initialRestaurants,
-  initialFriends,
 } from "./components/data";
 import {
   type AuthUser,
@@ -25,6 +26,10 @@ import {
   fetchRegisteredRestaurants,
   saveRegisteredRestaurant,
 } from "./services/restaurants";
+import {
+  fetchFriendRequests,
+  fetchFriends,
+} from "./services/friends";
 
 type View =
   | "home"
@@ -44,6 +49,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [currentView, setCurrentView] = useState<View>("home");
   const [restaurants, setRestaurants] = useState<Restaurant[]>(initialRestaurants);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
   const [homeFilter, setHomeFilter] = useState<'visited' | 'want'>('visited');
   const [selectedRestaurantId, setSelectedRestaurantId] =
     useState<string | undefined>();
@@ -53,6 +61,21 @@ export default function App() {
   const [selectedSearchResult, setSelectedSearchResult] = useState<
     SearchResult | undefined
   >();
+
+  const refreshFriends = useCallback(async () => {
+    setFriendsLoading(true);
+
+    try {
+      const [nextFriends, nextRequests] = await Promise.all([
+        fetchFriends(),
+        fetchFriendRequests(),
+      ]);
+      setFriends(nextFriends);
+      setFriendRequests(nextRequests);
+    } finally {
+      setFriendsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -67,6 +90,8 @@ export default function App() {
         clearAuthSession();
         setCurrentUser(null);
         setRestaurants(initialRestaurants);
+        setFriends([]);
+        setFriendRequests([]);
         setIsLoggedIn(false);
       });
 
@@ -77,7 +102,12 @@ export default function App() {
       .catch(() => {
         setRestaurants(initialRestaurants);
       });
-  }, [isLoggedIn]);
+
+    void refreshFriends().catch(() => {
+      setFriends([]);
+      setFriendRequests([]);
+    });
+  }, [isLoggedIn, refreshFriends]);
 
   const handleLogin = async (email: string, password: string, recaptchaToken: string) => {
     const session = await login(email, password, recaptchaToken);
@@ -101,6 +131,8 @@ export default function App() {
     setIsLoggedIn(false);
     setCurrentUser(null);
     setRestaurants(initialRestaurants);
+    setFriends([]);
+    setFriendRequests([]);
     setActiveTab("home");
     setCurrentView("home");
     setSelectedRestaurantId(undefined);
@@ -136,7 +168,10 @@ export default function App() {
       navigate("register");
       setSelectedRestaurantId(undefined);
       setSelectedSearchResult(undefined);
-    } else if (tab === "friends") navigate("friends");
+    } else if (tab === "friends") {
+      navigate("friends");
+      void refreshFriends().catch(() => undefined);
+    }
     else if (tab === "mypage") navigate("mypage");
   };
 
@@ -169,9 +204,10 @@ export default function App() {
               navigate("register", { restaurantId: id });
               setActiveTab("register");
             }}
-            onFriendRecords={(friendId) => {
-              navigate("friend-records", { friendId });
+            onFriendRecords={() => {
+              navigate("friends");
               setActiveTab("friends");
+              void refreshFriends().catch(() => undefined);
             }}
           />
         )}
@@ -205,7 +241,10 @@ export default function App() {
 
         {currentView === "friends" && (
           <FriendsScreen
-            friends={initialFriends}
+            friends={friends}
+            requests={friendRequests}
+            isLoading={friendsLoading}
+            onChanged={refreshFriends}
             onFriendClick={(id) =>
               navigate("friend-records", { friendId: id })
             }
@@ -216,14 +255,15 @@ export default function App() {
           selectedFriendId && (
             <FriendRecordsScreen
               friendId={selectedFriendId}
-              friends={initialFriends}
               onBack={() => navigate("friends")}
+              onRemoved={refreshFriends}
             />
           )}
 
         {currentView === "mypage" && (
           <MyPageScreen
             restaurants={restaurants}
+            friendCount={friends.length}
             user={currentUser}
             onLogout={handleLogout}
           />

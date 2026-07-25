@@ -7,7 +7,7 @@ interface DetailScreenProps {
   restaurants: Restaurant[];
   onBack: () => void;
   onEdit: (id: string) => void;
-  onFriendRecords: (friendId: string) => void;
+  onFriendRecords: () => void;
 }
 
 export function DetailScreen({ restaurantId, restaurants, onBack, onEdit, onFriendRecords }: DetailScreenProps) {
@@ -96,15 +96,15 @@ export function DetailScreen({ restaurantId, restaurants, onBack, onEdit, onFrie
 
         {/* Friend records button */}
         <button
-          onClick={() => onFriendRecords('f1')}
+          onClick={onFriendRecords}
           className="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3"
         >
           <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
             <Users size={18} className="text-orange-500" />
           </div>
           <div className="flex-1 text-left">
-            <p className="text-sm text-gray-800" style={{ fontWeight: 600 }}>フレンドの記録を見る</p>
-            <p className="text-xs text-gray-400">このお店に行ったフレンドを確認</p>
+            <p className="text-sm text-gray-800" style={{ fontWeight: 600 }}>フレンド一覧を見る</p>
+            <p className="text-xs text-gray-400">フレンドが記録したお店を確認</p>
           </div>
           <ChevronLeft size={16} className="text-gray-300 rotate-180" />
         </button>
