@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { MapPin, Search, SlidersHorizontal, Star } from 'lucide-react';
+import {
+  ArrowUpDown,
+  Building2,
+  Check,
+  CircleHelp,
+  MapPin,
+  Search,
+  SlidersHorizontal,
+  Star,
+  X,
+} from 'lucide-react';
 import { type Restaurant } from './data';
 
 type Filter = 'visited' | 'want';
@@ -187,11 +197,61 @@ function RestaurantSquareCard({
         </span>
       </div>
 
+      <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+        <span
+          className="flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] text-gray-600 shadow-sm"
+          aria-label={`階数: ${restaurant.floor === '1F' ? '1階' : '2階以上'}`}
+        >
+          <Building2 size={11} aria-hidden="true" />
+          <span style={{ fontWeight: 700 }}>{restaurant.floor}</span>
+        </span>
+        <ElevatorThumbnailBadge elevator={restaurant.elevator} />
+      </div>
+
       <div className="absolute inset-x-0 bottom-0 p-3">
         <p className="line-clamp-2 text-sm leading-snug text-white drop-shadow-sm" style={{ fontWeight: 700 }}>
           {restaurant.name}
         </p>
       </div>
     </button>
+  );
+}
+
+function ElevatorThumbnailBadge({
+  elevator,
+}: {
+  elevator: Restaurant['elevator'];
+}) {
+  const config = {
+    yes: {
+      label: 'EV有り',
+      shortLabel: '有',
+      className: 'text-emerald-600',
+      StatusIcon: Check,
+    },
+    no: {
+      label: 'EV無し',
+      shortLabel: '無',
+      className: 'text-red-500',
+      StatusIcon: X,
+    },
+    unknown: {
+      label: 'EV不明',
+      shortLabel: '不明',
+      className: 'text-gray-500',
+      StatusIcon: CircleHelp,
+    },
+  }[elevator];
+
+  return (
+    <span
+      className={`flex items-center gap-0.5 rounded-full bg-white/95 px-2 py-1 text-[10px] shadow-sm ${config.className}`}
+      aria-label={config.label}
+    >
+      <ArrowUpDown size={10} aria-hidden="true" />
+      <span style={{ fontWeight: 700 }}>EV</span>
+      <config.StatusIcon size={10} strokeWidth={3} aria-hidden="true" />
+      <span className="sr-only">{config.shortLabel}</span>
+    </span>
   );
 }
