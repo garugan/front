@@ -198,7 +198,7 @@ export function RegisterScreen({
             onChange={(e) => setMemo(e.target.value)}
             placeholder="感想・おすすめポイント・次回試したいメニューなど..."
             rows={4}
-            className="w-full bg-gray-100 rounded-xl px-3 py-2.5 text-sm text-gray-700 outline-none resize-none placeholder:text-gray-400"
+            className="w-full bg-gray-100 rounded-xl px-3 py-2.5 text-base text-gray-700 outline-none resize-none placeholder:text-gray-400 md:text-sm"
           />
         </div>
 
@@ -389,7 +389,7 @@ function RestaurantSearchPanel({
             onChange={(event) => {
               handleQueryChange(event.target.value);
             }}
-            className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+            className="flex-1 bg-transparent text-base text-gray-700 outline-none placeholder:text-gray-400 md:text-sm"
           />
           {query && (
             <button type="button" onClick={clearQuery}>

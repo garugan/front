@@ -71,7 +71,7 @@ export function HomeScreen({
             placeholder="お店を検索..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+            className="flex-1 bg-transparent text-base text-gray-700 outline-none placeholder:text-gray-400 md:text-sm"
           />
         </div>
 
