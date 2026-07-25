@@ -26,7 +26,7 @@ export function MyPageScreen({
   ];
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 overflow-y-auto">
+    <div className="h-full bg-gray-50 overflow-y-auto">
       {/* Header */}
       <div className="bg-white pt-10 px-4 pb-5 shadow-sm">
         <div className="flex items-center justify-between mb-5">
