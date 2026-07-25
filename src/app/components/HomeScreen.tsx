@@ -48,7 +48,7 @@ export function HomeScreen({
       {/* Status bar */}
       <div className="bg-white pt-10 px-4 pb-0 shadow-sm">
         {/* App header */}
-        <div className="flex min-h-9 items-center mb-3 pr-12">
+        <div className="flex min-h-9 items-center mb-2 pr-12">
           <div>
             <h1 className="text-xl text-gray-900">
               <span className="text-orange-500" style={{ fontWeight: 700 }}>Band</span>
@@ -57,85 +57,73 @@ export function HomeScreen({
           </div>
         </div>
 
-        {/* Quick stats */}
-        <div className="flex gap-3 mb-3">
-          <div className="flex-1 bg-orange-50 rounded-xl px-3 py-2">
-            <p className="text-[10px] text-orange-400">行ったお店</p>
-            <p className="text-orange-600" style={{ fontWeight: 700, fontSize: 18 }}>{visitedCount}<span className="text-xs ml-0.5" style={{ fontWeight: 400 }}>件</span></p>
+        <div className="mb-2 md:flex md:items-center md:gap-2">
+          {/* Search bar */}
+          <div className="mb-2 flex h-11 items-center gap-2 rounded-xl bg-gray-100 px-3 md:mb-0 md:flex-1">
+            <Search size={15} className="flex-shrink-0 text-gray-400" />
+            <input
+              type="text"
+              placeholder="お店を検索..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="min-w-0 flex-1 bg-transparent text-base text-gray-700 outline-none placeholder:text-gray-400 md:text-sm"
+            />
           </div>
-          <div className="flex-1 bg-sky-50 rounded-xl px-3 py-2">
-            <p className="text-[10px] text-sky-400">行きたいお店</p>
-            <p className="text-sky-600" style={{ fontWeight: 700, fontSize: 18 }}>{wantCount}<span className="text-xs ml-0.5" style={{ fontWeight: 400 }}>件</span></p>
-          </div>
-        </div>
 
-        {/* Search bar */}
-        <div className="flex items-center bg-gray-100 rounded-xl px-3 py-2.5 gap-2 mb-3">
-          <Search size={15} className="text-gray-400 flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="お店を検索..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-base text-gray-700 outline-none placeholder:text-gray-400 md:text-sm"
-          />
-        </div>
+          {/* Filters */}
+          <div className="grid grid-cols-4 gap-2 md:w-[32rem]">
+            <div className="col-span-2 flex h-11 rounded-xl bg-gray-100">
+              {([
+                ['visited', '行った', visitedCount],
+                ['want', '行きたい', wantCount],
+              ] as [Filter, string, number][]).map(([id, label, count]) => (
+                <button
+                  key={id}
+                  onClick={() => onFilterChange(id)}
+                  className={`h-11 flex-1 rounded-xl text-xs transition-all ${
+                    filter === id ? 'bg-white text-orange-500 shadow-sm' : 'text-gray-500'
+                  }`}
+                  style={{ fontWeight: filter === id ? 600 : 400 }}
+                >
+                  {label}
+                  <span className="ml-1 text-[10px] opacity-70">{count}</span>
+                </button>
+              ))}
+            </div>
 
-        {/* Filter tabs */}
-        <div className="flex bg-gray-100 rounded-xl p-1 mb-2">
-          {([['visited', '行った'], ['want', '行きたい']] as [Filter, string][]).map(
-            ([id, label]) => (
-              <button
-                key={id}
-                onClick={() => onFilterChange(id)}
-                className={`flex-1 py-1.5 text-xs rounded-lg transition-all ${
-                  filter === id ? 'bg-white text-orange-500 shadow-sm' : 'text-gray-500'
-                }`}
-                style={{ fontWeight: filter === id ? 600 : 400 }}
+            <label className="flex h-11 min-w-0 flex-col justify-center rounded-xl bg-gray-100 px-2">
+              <span className="text-[9px] leading-none text-gray-400">階数</span>
+              <select
+                value={floorFilter}
+                onChange={(event) => setFloorFilter(event.target.value as FloorFilter)}
+                className="w-full bg-transparent text-xs leading-tight text-gray-700 outline-none"
               >
-                {label}
-              </button>
-            )
-          )}
-        </div>
+                <option value="all">すべて</option>
+                <option value="1F">1階</option>
+                <option value="2F+">2階以上</option>
+              </select>
+            </label>
 
-        <div className="mb-3 grid grid-cols-2 gap-2">
-          <label className="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5">
-            <span className="text-xs text-gray-500" style={{ fontWeight: 600 }}>
-              階数
-            </span>
-            <select
-              value={floorFilter}
-              onChange={(event) => setFloorFilter(event.target.value as FloorFilter)}
-              className="min-w-20 bg-transparent text-right text-sm text-gray-700 outline-none"
-            >
-              <option value="all">すべて</option>
-              <option value="1F">1階</option>
-              <option value="2F+">2階以上</option>
-            </select>
-          </label>
-
-          <label className="flex items-center justify-between gap-2 rounded-xl bg-gray-100 px-3 py-2.5">
-            <span className="text-xs text-gray-500" style={{ fontWeight: 600 }}>
-              EV
-            </span>
-            <select
-              value={elevatorFilter}
-              onChange={(event) => setElevatorFilter(event.target.value as ElevatorFilter)}
-              className="min-w-20 bg-transparent text-right text-sm text-gray-700 outline-none"
-            >
-              <option value="all">すべて</option>
-              <option value="yes">あり</option>
-              <option value="no">なし</option>
-              <option value="unknown">不明</option>
-            </select>
-          </label>
+            <label className="flex h-11 min-w-0 flex-col justify-center rounded-xl bg-gray-100 px-2">
+              <span className="text-[9px] leading-none text-gray-400">EV</span>
+              <select
+                value={elevatorFilter}
+                onChange={(event) => setElevatorFilter(event.target.value as ElevatorFilter)}
+                className="w-full bg-transparent text-xs leading-tight text-gray-700 outline-none"
+              >
+                <option value="all">すべて</option>
+                <option value="yes">あり</option>
+                <option value="no">なし</option>
+                <option value="unknown">不明</option>
+              </select>
+            </label>
+          </div>
         </div>
       </div>
 
       {/* Restaurant list */}
-      <div className="flex-1 overflow-y-auto pt-3 pb-4">
-        <div className="px-4 mb-2">
+      <div className="flex-1 overflow-y-auto pt-2 pb-4">
+        <div className="px-4 mb-1.5">
           <span className="text-xs text-gray-400">{filtered.length}件のお店</span>
         </div>
         {filtered.length === 0 ? (
