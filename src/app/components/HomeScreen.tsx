@@ -6,7 +6,6 @@ import {
   CircleHelp,
   MapPin,
   Search,
-  SlidersHorizontal,
   Star,
   X,
 } from 'lucide-react';
@@ -49,16 +48,13 @@ export function HomeScreen({
       {/* Status bar */}
       <div className="bg-white pt-10 px-4 pb-0 shadow-sm">
         {/* App header */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex min-h-9 items-center mb-3 pr-12">
           <div>
             <h1 className="text-xl text-gray-900">
               <span className="text-orange-500" style={{ fontWeight: 700 }}>Band</span>
               <span style={{ fontWeight: 700 }}> Meshi</span>
             </h1>
           </div>
-          <button className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
-            <SlidersHorizontal size={17} className="text-orange-500" />
-          </button>
         </div>
 
         {/* Quick stats */}

@@ -126,7 +126,7 @@ export function FriendsScreen({
   return (
     <div className="h-full flex flex-col bg-gray-50">
       <div className="bg-white pt-10 px-4 pb-4 shadow-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pr-12">
           <h2 className="text-gray-800" style={{ fontWeight: 700 }}>
             フレンド
           </h2>
