@@ -1,6 +1,25 @@
 import { Star } from 'lucide-react';
 import { type Restaurant } from './data';
 
+export function UserAvatar({
+  name,
+  className = 'w-12 h-12',
+}: {
+  name: string;
+  className?: string;
+}) {
+  const initial = Array.from(name.trim())[0]?.toUpperCase() ?? '?';
+
+  return (
+    <div
+      className={`${className} rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-300 to-rose-400 text-white border-2 border-orange-100`}
+      aria-hidden="true"
+    >
+      <span className="text-sm font-bold">{initial}</span>
+    </div>
+  );
+}
+
 export function StarDisplay({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
     <div className="flex gap-0.5">

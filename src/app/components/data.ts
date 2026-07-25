@@ -16,18 +16,35 @@ export interface Restaurant {
 export interface Friend {
   id: string;
   name: string;
-  avatar: string;
+  email: string;
   restaurantCount: number;
-  recentRestaurant: {
-    name: string;
-    photo: string;
-    rating: number;
-    visitDate: string;
-    floor: '1F' | '2F+';
-    elevator: 'yes' | 'no' | 'unknown';
-    status: 'visited' | 'want';
-  };
+  recentRestaurant: Restaurant | null;
+}
+
+export interface FriendDetails {
+  id: string;
+  name: string;
+  email: string;
+  restaurantCount: number;
   restaurants: Restaurant[];
+}
+
+export interface FriendRequest {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+}
+
+export interface FriendSearchResult {
+  id: string;
+  name: string;
+  email: string;
+  relationship: 'none' | 'friends' | 'incoming' | 'outgoing';
+  requestId?: string;
 }
 
 export interface SearchResult {
@@ -39,5 +56,3 @@ export interface SearchResult {
 }
 
 export const initialRestaurants: Restaurant[] = [];
-
-export const initialFriends: Friend[] = [];

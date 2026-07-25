@@ -1,19 +1,20 @@
 import { Settings, ChevronRight, Bell, Shield, HelpCircle, LogOut, Star, UtensilsCrossed, Users, Heart, User } from 'lucide-react';
-import { type Restaurant, initialFriends } from './data';
+import { type Restaurant } from './data';
 import { type AuthUser } from '../services/auth';
 
 export function MyPageScreen({
   restaurants,
+  friendCount,
   user,
   onLogout,
 }: {
   restaurants: Restaurant[];
+  friendCount: number;
   user: AuthUser | null;
   onLogout: () => void;
 }) {
   const visitedCount = restaurants.filter((r) => r.status === 'visited').length;
   const wantCount = restaurants.filter((r) => r.status === 'want').length;
-  const friendCount = initialFriends.length;
   const displayName = user?.name?.trim() || user?.email.split('@')[0] || 'ユーザー';
   const displayEmail = user?.email ?? '';
   const initial = displayName.slice(0, 1).toUpperCase();
