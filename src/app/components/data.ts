@@ -2,7 +2,6 @@ export interface Restaurant {
   id: string;
   name: string;
   photo: string;
-  photoName?: string;
   status: 'visited' | 'want';
   rating: number;
   visitDate?: string;
@@ -11,6 +10,16 @@ export interface Restaurant {
   elevator: 'yes' | 'no' | 'unknown';
   category: string;
   address: string;
+}
+
+export interface PlacePhoto {
+  url: string;
+  authorAttributions: Array<{
+    displayName: string;
+    uri?: string;
+    photoUri?: string;
+  }>;
+  googleMapsUri: string;
 }
 
 export interface Friend {
@@ -52,7 +61,6 @@ export interface SearchResult {
   name: string;
   category: string;
   address: string;
-  photoName?: string;
 }
 
 export const initialRestaurants: Restaurant[] = [];

@@ -80,27 +80,22 @@ export function RestaurantCardRow({
       className="bg-white rounded-2xl mx-4 mb-3 shadow-sm overflow-hidden cursor-pointer active:opacity-80"
       onClick={onClick}
     >
-      <div className="flex">
-        <div className="w-24 h-24 flex-shrink-0">
-          <img src={restaurant.photo} alt={restaurant.name} className="w-full h-full object-cover" />
+      <div className="p-3">
+        <p className="text-sm font-semibold text-gray-800 leading-snug line-clamp-1 mb-1">{restaurant.name}</p>
+        <div className="flex flex-wrap gap-1 mb-1.5">
+          <StatusTag status={restaurant.status} />
+          <FloorTag floor={restaurant.floor} />
+          <ElevatorTag elevator={restaurant.elevator} />
         </div>
-        <div className="flex-1 p-3 min-w-0">
-          <p className="text-sm font-semibold text-gray-800 leading-snug line-clamp-1 mb-1">{restaurant.name}</p>
-          <div className="flex flex-wrap gap-1 mb-1.5">
-            <StatusTag status={restaurant.status} />
-            <FloorTag floor={restaurant.floor} />
-            <ElevatorTag elevator={restaurant.elevator} />
+        {restaurant.status === 'visited' && (
+          <div className="flex items-center gap-1.5 mb-1">
+            <StarDisplay rating={restaurant.rating} size={11} />
+            {restaurant.visitDate && (
+              <span className="text-[10px] text-gray-400">{restaurant.visitDate}</span>
+            )}
           </div>
-          {restaurant.status === 'visited' && (
-            <div className="flex items-center gap-1.5 mb-1">
-              <StarDisplay rating={restaurant.rating} size={11} />
-              {restaurant.visitDate && (
-                <span className="text-[10px] text-gray-400">{restaurant.visitDate}</span>
-              )}
-            </div>
-          )}
-          <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{restaurant.memo}</p>
-        </div>
+        )}
+        <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">{restaurant.memo}</p>
       </div>
     </div>
   );

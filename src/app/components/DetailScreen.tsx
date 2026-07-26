@@ -1,5 +1,14 @@
-import { ChevronLeft, MapPin, Pencil, Users } from 'lucide-react';
-import { type Restaurant } from './data';
+import { useEffect, useState } from 'react';
+import {
+  ChevronLeft,
+  ExternalLink,
+  LoaderCircle,
+  MapPin,
+  Pencil,
+  Users,
+} from 'lucide-react';
+import { fetchRestaurantPhoto } from '../services/restaurants';
+import { type PlacePhoto, type Restaurant } from './data';
 import { StarDisplay, StatusTag, FloorTag, ElevatorTag } from './shared';
 
 interface DetailScreenProps {
@@ -12,6 +21,29 @@ interface DetailScreenProps {
 
 export function DetailScreen({ restaurantId, restaurants, onBack, onEdit, onFriendRecords }: DetailScreenProps) {
   const restaurant = restaurants.find((r) => r.id === restaurantId);
+  const [photo, setPhoto] = useState<PlacePhoto | null>();
+
+  useEffect(() => {
+    if (!restaurant) {
+      setPhoto(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setPhoto(undefined);
+
+    void fetchRestaurantPhoto(restaurant.id, controller.signal)
+      .then(setPhoto)
+      .catch((error) => {
+        if (!(error instanceof Error && error.name === 'AbortError')) {
+          setPhoto(null);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [restaurant]);
 
   if (!restaurant) {
     return (
@@ -25,9 +57,75 @@ export function DetailScreen({ restaurantId, restaurants, onBack, onEdit, onFrie
     <div className="h-full flex flex-col bg-gray-50 overflow-y-auto">
       {/* Photo header */}
       <div className="relative flex-shrink-0">
-        <div className="h-56 bg-gray-200 overflow-hidden">
-          <img src={restaurant.photo} alt={restaurant.name} className="w-full h-full object-cover" />
+        <div className="relative h-56 overflow-hidden bg-gradient-to-br from-orange-50 via-white to-sky-50">
+          {photo === undefined ? (
+            <div className="flex h-full items-center justify-center text-orange-300">
+              <LoaderCircle size={28} className="animate-spin" />
+            </div>
+          ) : photo ? (
+            <img
+              src={photo.url}
+              alt={restaurant.name}
+              className="h-full w-full object-cover"
+              onError={() => setPhoto(null)}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <MapPin size={42} className="text-orange-300" />
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+
+          {photo && (
+            <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-end justify-between gap-2 text-[10px] text-white">
+              <div className="flex flex-wrap gap-2">
+                {photo.authorAttributions.map((author, index) => {
+                  const content = (
+                    <>
+                      {author.photoUri && (
+                        <img
+                          src={author.photoUri}
+                          alt=""
+                          className="h-5 w-5 rounded-full object-cover"
+                        />
+                      )}
+                      <span>{author.displayName}</span>
+                    </>
+                  );
+
+                  return author.uri ? (
+                    <a
+                      key={`${author.displayName}-${index}`}
+                      href={author.uri}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 backdrop-blur-sm"
+                    >
+                      {content}
+                    </a>
+                  ) : (
+                    <span
+                      key={`${author.displayName}-${index}`}
+                      className="flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 backdrop-blur-sm"
+                    >
+                      {content}
+                    </span>
+                  );
+                })}
+              </div>
+              <a
+                href={photo.googleMapsUri}
+                target="_blank"
+                rel="noreferrer"
+                translate="no"
+                aria-label="Google Mapsで元の写真を見る"
+                className="flex items-center gap-1 whitespace-nowrap rounded-full bg-white/95 px-2 py-1 text-xs font-normal text-gray-700 shadow-sm"
+              >
+                Google Maps
+                <ExternalLink size={12} />
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Back button */}

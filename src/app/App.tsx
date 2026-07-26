@@ -61,6 +61,7 @@ export default function App() {
   const [selectedSearchResult, setSelectedSearchResult] = useState<
     SearchResult | undefined
   >();
+  const [registerSession, setRegisterSession] = useState(0);
 
   const refreshFriends = useCallback(async () => {
     setFriendsLoading(true);
@@ -165,6 +166,7 @@ export default function App() {
     setActiveTab(tab);
     if (tab === "home") navigate("home");
     else if (tab === "register") {
+      setRegisterSession((current) => current + 1);
       navigate("register");
       setSelectedRestaurantId(undefined);
       setSelectedSearchResult(undefined);
@@ -195,6 +197,7 @@ export default function App() {
             restaurants={restaurants}
             onBack={() => navigate("home")}
             onEdit={(id) => {
+              setRegisterSession((current) => current + 1);
               setSelectedSearchResult(undefined);
               navigate("register", { restaurantId: id });
               setActiveTab("register");
@@ -209,6 +212,7 @@ export default function App() {
 
         {currentView === "register" && (
           <RegisterScreen
+            key={`${selectedRestaurantId ?? "new"}:${registerSession}`}
             restaurantId={selectedRestaurantId}
             restaurants={restaurants}
             initialRestaurant={selectedSearchResult}

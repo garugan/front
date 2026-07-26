@@ -10,6 +10,10 @@ import {
 } from 'lucide-react';
 import { executeRecaptcha } from '../services/recaptcha';
 
+const registrationEnabled =
+  import.meta.env.VITE_REGISTRATION_ENABLED === undefined ||
+  import.meta.env.VITE_REGISTRATION_ENABLED.toLowerCase() === 'true';
+
 interface LoginScreenProps {
   onLogin: (email: string, password: string, recaptchaToken: string) => Promise<void>;
   onRegister: (
@@ -112,30 +116,32 @@ export function LoginScreen({ onLogin, onRegister }: LoginScreenProps) {
             </p>
           </div>
 
-          <div className="mb-5 grid grid-cols-2 rounded-2xl bg-gray-100 p-1">
-            {([
-              ['login', 'ログイン'],
-              ['register', '新規登録'],
-            ] as const).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => {
-                  setMode(id);
-                  setError(undefined);
-                  setPassword('');
-                  setPasswordConfirm('');
-                  setShowPassword(false);
-                }}
-                className={`rounded-xl py-2.5 text-xs transition-all ${
-                  mode === id ? 'bg-white text-orange-500 shadow-sm' : 'text-gray-500'
-                }`}
-                style={{ fontWeight: mode === id ? 700 : 500 }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {registrationEnabled && (
+            <div className="mb-5 grid grid-cols-2 rounded-2xl bg-gray-100 p-1">
+              {([
+                ['login', 'ログイン'],
+                ['register', '新規登録'],
+              ] as const).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => {
+                    setMode(id);
+                    setError(undefined);
+                    setPassword('');
+                    setPasswordConfirm('');
+                    setShowPassword(false);
+                  }}
+                  className={`rounded-xl py-2.5 text-xs transition-all ${
+                    mode === id ? 'bg-white text-orange-500 shadow-sm' : 'text-gray-500'
+                  }`}
+                  style={{ fontWeight: mode === id ? 700 : 500 }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
             {mode === 'register' && (

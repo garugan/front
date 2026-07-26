@@ -1,15 +1,7 @@
 import { useState } from 'react';
-import {
-  ArrowUpDown,
-  Building2,
-  Check,
-  CircleHelp,
-  MapPin,
-  Search,
-  Star,
-  X,
-} from 'lucide-react';
+import { ChevronRight, MapPin, Search } from 'lucide-react';
 import { type Restaurant } from './data';
+import { StarDisplay, StatusTag } from './shared';
 
 type Filter = 'visited' | 'want';
 type ElevatorFilter = 'all' | 'yes' | 'no' | 'unknown';
@@ -132,9 +124,9 @@ export function HomeScreen({
             <p className="text-sm">お店が見つかりません</p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 xl:grid-cols-4 gap-3 px-4">
+          <div className="grid grid-cols-1 gap-3 px-4 md:grid-cols-2">
             {filtered.map((r) => (
-              <RestaurantSquareCard
+              <RestaurantListCard
                 key={r.id}
                 restaurant={r}
                 onClick={() => onRestaurantClick(r.id)}
@@ -147,7 +139,7 @@ export function HomeScreen({
   );
 }
 
-function RestaurantSquareCard({
+function RestaurantListCard({
   restaurant,
   onClick,
 }: {
@@ -158,84 +150,41 @@ function RestaurantSquareCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative aspect-square overflow-hidden rounded-2xl bg-white text-left shadow-sm active:opacity-80"
+      className="w-full rounded-2xl bg-white p-4 text-left shadow-sm transition active:opacity-80"
     >
-      {restaurant.photo ? (
-        <img
-          src={restaurant.photo}
-          alt={restaurant.name}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-        />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-sky-50">
-          <MapPin size={34} className="text-orange-300" />
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <p
+              className="line-clamp-2 text-sm leading-snug text-gray-800"
+              style={{ fontWeight: 700 }}
+            >
+              {restaurant.name}
+            </p>
+            <StatusTag status={restaurant.status} />
+          </div>
+
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] text-gray-500">
+              {restaurant.category}
+            </span>
+            {restaurant.status === 'visited' && (
+              <div className="flex items-center gap-1.5">
+                <StarDisplay rating={restaurant.rating} size={12} />
+                <span className="text-xs text-orange-500" style={{ fontWeight: 700 }}>
+                  {restaurant.rating > 0 ? restaurant.rating : '-'}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-start gap-1.5 text-[11px] text-gray-400">
+            <MapPin size={12} className="mt-0.5 flex-shrink-0" />
+            <span className="line-clamp-1">{restaurant.address}</span>
+          </div>
         </div>
-      )}
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/20" />
-
-      <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] text-orange-500 shadow-sm">
-        <Star size={12} className="fill-orange-400 text-orange-400" />
-        <span style={{ fontWeight: 700 }}>
-          {restaurant.status === 'visited' && restaurant.rating > 0 ? restaurant.rating : '-'}
-        </span>
-      </div>
-
-      <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-        <span
-          className="flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] text-gray-600 shadow-sm"
-          aria-label={`階数: ${restaurant.floor === '1F' ? '1階' : '2階以上'}`}
-        >
-          <Building2 size={11} aria-hidden="true" />
-          <span style={{ fontWeight: 700 }}>{restaurant.floor}</span>
-        </span>
-        <ElevatorThumbnailBadge elevator={restaurant.elevator} />
-      </div>
-
-      <div className="absolute inset-x-0 bottom-0 p-3">
-        <p className="line-clamp-2 text-sm leading-snug text-white drop-shadow-sm" style={{ fontWeight: 700 }}>
-          {restaurant.name}
-        </p>
+        <ChevronRight size={17} className="mt-1 flex-shrink-0 text-gray-300" />
       </div>
     </button>
-  );
-}
-
-function ElevatorThumbnailBadge({
-  elevator,
-}: {
-  elevator: Restaurant['elevator'];
-}) {
-  const config = {
-    yes: {
-      label: 'EV有り',
-      shortLabel: '有',
-      className: 'text-emerald-600',
-      StatusIcon: Check,
-    },
-    no: {
-      label: 'EV無し',
-      shortLabel: '無',
-      className: 'text-red-500',
-      StatusIcon: X,
-    },
-    unknown: {
-      label: 'EV不明',
-      shortLabel: '不明',
-      className: 'text-gray-500',
-      StatusIcon: CircleHelp,
-    },
-  }[elevator];
-
-  return (
-    <span
-      className={`flex items-center gap-0.5 rounded-full bg-white/95 px-2 py-1 text-[10px] shadow-sm ${config.className}`}
-      aria-label={config.label}
-    >
-      <ArrowUpDown size={10} aria-hidden="true" />
-      <span style={{ fontWeight: 700 }}>EV</span>
-      <config.StatusIcon size={10} strokeWidth={3} aria-hidden="true" />
-      <span className="sr-only">{config.shortLabel}</span>
-    </span>
   );
 }

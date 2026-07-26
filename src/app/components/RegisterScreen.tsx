@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Camera,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -30,8 +29,11 @@ export function RegisterScreen({
   onSave,
   onSaved,
 }: RegisterScreenProps) {
-  const existing = restaurantId ? restaurants.find((r) => r.id === restaurantId) : null;
-  const draft = existing ?? initialRestaurant;
+  const isEditMode = restaurantId !== undefined;
+  const existing = restaurantId
+    ? restaurants.find((restaurant) => restaurant.id === restaurantId)
+    : undefined;
+  const draft = isEditMode ? existing : initialRestaurant;
 
   const [selectedRestaurant, setSelectedRestaurant] = useState<SearchResult | undefined>(draft);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -47,25 +49,27 @@ export function RegisterScreen({
   const [saveError, setSaveError] = useState<string | undefined>();
   const address = selectedRestaurant?.address ?? 'タップしてお店を検索してください';
   const category = selectedRestaurant?.category;
+  const canSave = Boolean(isEditMode ? existing : selectedRestaurant);
 
   const handleSave = async () => {
-    if (!selectedRestaurant || isSaving) {
+    const restaurantDetails = isEditMode ? existing : selectedRestaurant;
+
+    if (!restaurantDetails || isSaving) {
       return;
     }
 
     const restaurant: Restaurant = {
-      id: existing?.id ?? selectedRestaurant.id,
-      name: selectedRestaurant.name,
-      photo: existing?.photo ?? '',
-      photoName: selectedRestaurant.photoName,
+      id: existing?.id ?? restaurantDetails.id,
+      name: restaurantDetails.name,
+      photo: '',
       status,
       rating,
       visitDate: status === 'visited' ? visitDate : undefined,
       memo,
       floor,
       elevator,
-      category: selectedRestaurant.category,
-      address: selectedRestaurant.address,
+      category: restaurantDetails.category,
+      address: restaurantDetails.address,
     };
 
     setIsSaving(true);
@@ -86,41 +90,67 @@ export function RegisterScreen({
       {/* Header */}
       <div className="bg-white pt-10 pl-4 pr-16 pb-4 shadow-sm flex items-center gap-3">
         <h2 className="text-gray-800 flex-1" style={{ fontWeight: 700 }}>
-          {existing ? 'お店を編集' : 'お店を記録する'}
+          {isEditMode ? 'お店を編集' : 'お店を記録する'}
         </h2>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-6">
         {/* Restaurant name */}
-        <button
-          type="button"
-          onClick={() => setIsSearchOpen(true)}
-          className="w-[calc(100%-2rem)] bg-white mx-4 mt-4 rounded-2xl p-4 shadow-sm text-left active:opacity-80"
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-              <Search size={16} className="text-orange-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-400 mb-1" style={{ fontWeight: 600 }}>
-                店名
-              </p>
-              <p
-                className={selectedRestaurant ? 'text-gray-800' : 'text-gray-400'}
-                style={{ fontWeight: 600 }}
-              >
-                {selectedRestaurant?.name ?? 'お店を検索'}
-              </p>
-              <p className="text-[11px] text-gray-400 mt-0.5">{address}</p>
-              {category && (
+        {isEditMode && existing ? (
+          <div className="w-[calc(100%-2rem)] bg-white mx-4 mt-4 rounded-2xl p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                <MapPin size={16} className="text-orange-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-400 mb-1" style={{ fontWeight: 600 }}>
+                  店名
+                </p>
+                <p className="text-gray-800" style={{ fontWeight: 600 }}>
+                  {existing.name}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{existing.address}</p>
                 <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 mt-2">
-                  {category}
+                  {existing.category}
                 </span>
-              )}
+              </div>
             </div>
-            <ChevronRight size={16} className="text-gray-300 mt-3 flex-shrink-0" />
           </div>
-        </button>
+        ) : isEditMode ? (
+          <div className="mx-4 mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-500">
+            編集対象のお店が見つかりません。ホームから開き直してください。
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="w-[calc(100%-2rem)] bg-white mx-4 mt-4 rounded-2xl p-4 shadow-sm text-left active:opacity-80"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                <Search size={16} className="text-orange-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-400 mb-1" style={{ fontWeight: 600 }}>
+                  店名
+                </p>
+                <p
+                  className={selectedRestaurant ? 'text-gray-800' : 'text-gray-400'}
+                  style={{ fontWeight: 600 }}
+                >
+                  {selectedRestaurant?.name ?? 'お店を検索'}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{address}</p>
+                {category && (
+                  <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 mt-2">
+                    {category}
+                  </span>
+                )}
+              </div>
+              <ChevronRight size={16} className="text-gray-300 mt-3 flex-shrink-0" />
+            </div>
+          </button>
+        )}
 
         {/* Status */}
         <div className="bg-white mx-4 mt-3 rounded-2xl p-4 shadow-sm">
@@ -251,15 +281,6 @@ export function RegisterScreen({
           </div>
         </div>
 
-        {/* Photo */}
-        <div className="bg-white mx-4 mt-3 rounded-2xl p-4 shadow-sm">
-          <p className="text-xs text-gray-500 mb-3" style={{ fontWeight: 600 }}>写真</p>
-          <button className="w-full border-2 border-dashed border-gray-200 rounded-xl py-6 flex flex-col items-center gap-2 text-gray-400">
-            <Camera size={28} className="opacity-50" />
-            <span className="text-xs">タップして写真を追加</span>
-          </button>
-        </div>
-
         {/* Save button */}
         <div className="mx-4 mt-4">
           {saveError && (
@@ -267,11 +288,11 @@ export function RegisterScreen({
           )}
           <button
             onClick={handleSave}
-            disabled={!selectedRestaurant || saved || isSaving}
+            disabled={!canSave || saved || isSaving}
             className={`w-full py-4 rounded-2xl text-white transition-all ${
               saved
                 ? 'bg-emerald-500'
-                : selectedRestaurant
+                : canSave
                 ? 'bg-orange-500 active:bg-orange-600'
                 : 'bg-gray-300'
             } shadow-lg disabled:shadow-none`}
@@ -291,7 +312,7 @@ export function RegisterScreen({
         </div>
       </div>
 
-      {isSearchOpen && (
+      {!isEditMode && isSearchOpen && (
         <RestaurantSearchPanel
           onClose={() => setIsSearchOpen(false)}
           onSelect={(restaurant) => {
@@ -320,7 +341,7 @@ function RestaurantSearchPanel({
   useEffect(() => {
     const normalizedQuery = query.trim();
 
-    if (!normalizedQuery) {
+    if (normalizedQuery.length < 2) {
       setResults([]);
       setIsSearching(false);
       setErrorMessage(undefined);
@@ -352,7 +373,7 @@ function RestaurantSearchPanel({
   const handleQueryChange = (value: string) => {
     setQuery(value);
     const normalizedValue = value.trim();
-    setSearched(normalizedValue.length > 0);
+    setSearched(normalizedValue.length >= 2);
   };
 
   const clearQuery = () => {
@@ -385,6 +406,7 @@ function RestaurantSearchPanel({
             autoFocus
             type="text"
             placeholder="店名・エリアで検索..."
+            maxLength={100}
             value={query}
             onChange={(event) => {
               handleQueryChange(event.target.value);
@@ -404,7 +426,7 @@ function RestaurantSearchPanel({
           <div className="flex flex-col items-center justify-center px-6 py-16 text-center text-gray-400">
             <Search size={40} className="mb-3 opacity-30" />
             <p className="text-sm text-gray-500" style={{ fontWeight: 600 }}>
-              店名やエリアを入力してください
+              店名やエリアを2文字以上入力してください
             </p>
             <p className="text-xs mt-1 leading-relaxed">
               Google Places から候補を検索します。
