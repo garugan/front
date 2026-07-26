@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { ChevronRight, MapPin, Search } from 'lucide-react';
+import {
+  ArrowUpDown,
+  Building2,
+  Check,
+  ChevronRight,
+  CircleHelp,
+  MapPin,
+  Search,
+  X,
+} from 'lucide-react';
 import { type Restaurant } from './data';
 import { StarDisplay, StatusTag } from './shared';
 
@@ -168,6 +177,14 @@ function RestaurantListCard({
             <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[10px] text-gray-500">
               {restaurant.category}
             </span>
+            <span
+              className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[10px] text-gray-500"
+              aria-label={`階数: ${restaurant.floor === '1F' ? '1階' : '2階以上'}`}
+            >
+              <Building2 size={11} aria-hidden="true" />
+              {restaurant.floor === '1F' ? '1階' : '2階以上'}
+            </span>
+            <ElevatorListBadge elevator={restaurant.elevator} />
             {restaurant.status === 'visited' && (
               <div className="flex items-center gap-1.5">
                 <StarDisplay rating={restaurant.rating} size={12} />
@@ -186,5 +203,43 @@ function RestaurantListCard({
         <ChevronRight size={17} className="mt-1 flex-shrink-0 text-gray-300" />
       </div>
     </button>
+  );
+}
+
+function ElevatorListBadge({
+  elevator,
+}: {
+  elevator: Restaurant['elevator'];
+}) {
+  const config = {
+    yes: {
+      label: 'エレベーターあり',
+      shortLabel: 'あり',
+      className: 'bg-emerald-50 text-emerald-600',
+      StatusIcon: Check,
+    },
+    no: {
+      label: 'エレベーターなし',
+      shortLabel: 'なし',
+      className: 'bg-red-50 text-red-500',
+      StatusIcon: X,
+    },
+    unknown: {
+      label: 'エレベーター不明',
+      shortLabel: '不明',
+      className: 'bg-gray-100 text-gray-500',
+      StatusIcon: CircleHelp,
+    },
+  }[elevator];
+
+  return (
+    <span
+      className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] ${config.className}`}
+      aria-label={config.label}
+    >
+      <ArrowUpDown size={10} aria-hidden="true" />
+      <config.StatusIcon size={10} strokeWidth={3} aria-hidden="true" />
+      {config.shortLabel}
+    </span>
   );
 }

@@ -272,6 +272,7 @@ export default function App() {
       <AppMenu
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        onLogout={handleLogout}
       />
     </div>
   );

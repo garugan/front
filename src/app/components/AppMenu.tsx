@@ -1,9 +1,18 @@
-import { Home, Menu, Plus, Users, User, type LucideIcon } from 'lucide-react';
+import {
+  Home,
+  LogOut,
+  Menu,
+  Plus,
+  Users,
+  User,
+  type LucideIcon,
+} from 'lucide-react';
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -14,6 +23,7 @@ export type Tab = 'home' | 'register' | 'friends' | 'mypage';
 interface AppMenuProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
+  onLogout: () => void;
 }
 
 const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
@@ -23,7 +33,7 @@ const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: 'mypage', label: 'マイページ', icon: User },
 ];
 
-export function AppMenu({ activeTab, onTabChange }: AppMenuProps) {
+export function AppMenu({ activeTab, onTabChange, onLogout }: AppMenuProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -85,6 +95,21 @@ export function AppMenu({ activeTab, onTabChange }: AppMenuProps) {
             );
           })}
         </nav>
+
+        <SheetFooter className="border-t border-gray-100 p-3">
+          <SheetClose asChild>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex h-12 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-400">
+                <LogOut size={18} strokeWidth={1.8} />
+              </span>
+              <span>ログアウト</span>
+            </button>
+          </SheetClose>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
